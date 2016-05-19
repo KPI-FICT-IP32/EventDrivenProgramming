@@ -20,6 +20,11 @@ class Observable {
     }
 }
 
+
+module.exports = {
+    Observable: Observable,
+}
+
 // var o = new Observable();
 // var o1 = o.filter(({a}) => a < 12);
 // o.on((x) => {console.log(`o: ${x}`);});
