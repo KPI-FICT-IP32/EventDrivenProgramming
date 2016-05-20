@@ -13,8 +13,8 @@ const server = api.http.createServer((req, res) => {
   res.end(index);
 });
 
-server.listen(80, () => {
-  console.log('Listen port 80');
+server.listen(8042, () => {
+  console.log('Listen port 8042');
 });
 
 const ws = new api.websocket.server({

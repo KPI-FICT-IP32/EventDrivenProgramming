@@ -40,7 +40,7 @@ input { border: 1px solid green; width: 30px; }
     }));
   }
 
-  var socket = new WebSocket('ws://127.0.0.1/');
+  var socket = new WebSocket('ws://127.0.0.1:8042/');
 
   socket.onmessage = function(event) {
     var change = JSON.parse(event.data);
