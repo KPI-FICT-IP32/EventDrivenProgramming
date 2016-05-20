@@ -1,41 +1,44 @@
+"use strict";
+
 global.api = {};
 api.fs = require('fs');
 api.http = require('http');
 api.websocket = require('websocket');
 
-var index = api.fs.readFileSync('./index.html');
 
-var server = api.http.createServer(function(req, res) {
+const index = api.fs.readFileSync('./index.html');
+
+const server = api.http.createServer((req, res) => {
   res.writeHead(200);
   res.end(index);
 });
 
-server.listen(80, function() {
+server.listen(80, () => {
   console.log('Listen port 80');
 });
 
-var ws = new api.websocket.server({
+const ws = new api.websocket.server({
   httpServer: server,
   autoAcceptConnections: false
 });
 
-var clients = [];
+const clients = [];
 
-ws.on('request', function(req) {
-  var connection = req.accept('', req.origin);
+ws.on('request', (req) => {
+  const connection = req.accept('', req.origin);
   clients.push(connection);
-  console.log('Connected ' + connection.remoteAddress);
-  connection.on('message', function(message) {
-    var dataName = message.type + 'Data',
+  console.log(`Connected ${connection.remoteAddress}`);
+  connection.on('message', (message) => {
+    const dataName = `${message.type}Data`,
         data = message[dataName];
-    console.log('Received: ' + data);
-    clients.forEach(function(client) {
+    console.log(`Received: ${data}`);
+    clients.forEach((client) => {
       if (connection !== client) {
         client.send(data);
       }
     });
   });
-  connection.on('close', function(reasonCode, description) {
-    console.log('Disconnected ' + connection.remoteAddress);
+  connection.on('close', (reasonCode, description) => {
+    console.log(`Disconnected ${connection.remoteAddress}`);
   });
 });
