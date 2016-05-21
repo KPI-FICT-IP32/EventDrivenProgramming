@@ -8,23 +8,21 @@ input { border: 1px solid green; width: 30px; }
 </style>
 <script src="/reactivity.js" type="text/javascript"></script>
 <script>
+
   const eventBus = new reactivity.Observable();
 
   const table = document.getElementById('table');
-  // var cells = {};
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   let tr;
   tr = document.createElement('tr');
-  tr.innerHTML = '<td></td>' + letters.map((col) => {
-    return `<td> ${col} </td>`;
-  }).join('');
+  tr.innerHTML = `<td></td>${letters.map((col) => `<td> ${col} </td>`).join('')}`;
   table.appendChild(tr);
 
   for (let i = 1; i <= 5; i++) {
     tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + i + '</td>' + letters.map(function(col) {
-      return '<td><input id="' + col + i + '" type="text"></td>';
+    tr.innerHTML = '<td>' + i + '</td>' + letters.map((col) => {
+      return `<td><input id="${col}${i}" type="text"></td>`;
     }).join('');
     table.appendChild(tr);
     letters.forEach((col) => {
@@ -32,8 +30,8 @@ input { border: 1px solid green; width: 30px; }
       let input = document.getElementById(cell);
       const listener = (
           eventBus
-          .filter((x) => x.cell === cell && x._source === 'remote')
-          .subscribe(({value}) => {input.value = value;})
+          .filter(({data, _source}) => data.cell === cell && _source === 'remote')
+          .subscribe(({data}) => {input.value = data.value;})
       );
       input.addEventListener('keyup', keyup);
     });
@@ -42,24 +40,25 @@ input { border: 1px solid green; width: 30px; }
   function keyup({target}) {
     eventBus.emit({
       _source: 'local',
-      cell: target.id,
-      value: target.value,
+      data: {
+        cell: target.id,
+        value: target.value,
+      },
     });
   }
 
-  var socket = new WebSocket('ws://127.0.0.1:8042/');
+  const socket = new WebSocket('ws://127.0.0.1:8042/');
+  // TODO: write a websocket Observable wrapper 
+  // FIXME: get rid of manually managing _source (do that in wrapper)
   const wslistener = (
       eventBus
       .filter(({_source}) => _source === 'local')
-      .subscribe((x) => { socket.send(JSON.stringify(x)); })
+      .subscribe(({data}) => { socket.send(JSON.stringify(data)); })
   );
 
   socket.onmessage = function(event) {
     let change = JSON.parse(event.data);
-    change._source = 'remote';
-    eventBus.emit(change);
-    // var cell = cells[change.cell];
-    // cell.value = change.value;
+    eventBus.emit({_source: 'remote', data: change});
   };
 
 </script>
