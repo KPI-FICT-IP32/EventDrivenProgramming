@@ -82,7 +82,6 @@ reactivity.Observable = class {
         return filtered;
     }
 
-
     /**
      * Creates a new observable, which emits elements created by applying 
      * {fn} to given observable's emitted data
@@ -124,7 +123,6 @@ reactivity.Observable = class {
         }
     }
 
-
     /**
      * Merges given observables into one stream
      *
@@ -150,8 +148,10 @@ reactivity.Observable = class {
 }
 
 
-// Export Observable, Observer
-module.exports = reactivity;
+// Export
+if (typeof(module) !== 'undefined') {
+    module.exports = reactivity;
+}
 
 
-// vim: set ts=4 sw=4 tw=0 et :
+/* vim: set ts=4 sw=4 tw=0 et : */
