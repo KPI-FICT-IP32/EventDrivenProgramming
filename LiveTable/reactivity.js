@@ -41,7 +41,7 @@ reactivity.Observer = class {
      */
     onNext(data) {
         if (this.isClosed) {
-            throw new IllegalStateError('Observer is closed'); 
+            throw new reactivity.IllegalStateError('Observer is closed'); 
         }
 
         // Run callback. If error happens run error handler
@@ -74,7 +74,7 @@ reactivity.Observable = class {
      * return a new Observable
      */
     filter(fn, onError) {
-        const filtered = new Observable();
+        const filtered = new reactivity.Observable();
         this.subscribe(
             (data) => { if (fn(data)) filtered.emit(data); },
             onError     
@@ -88,7 +88,7 @@ reactivity.Observable = class {
      * {fn} to given observable's emitted data
      */
     map(fn, onError) {
-        const mapped = new Observable();
+        const mapped = new reactivity.Observable();
         this.subscribe((data) => { mapped.emit(fn(data)); }, onError);
         return mapped;
     }
@@ -137,9 +137,9 @@ reactivity.Observable = class {
             throw new TypeError('At least one argument must be provided');
         }
 
-        const merged = new Observable();
+        const merged = new reactivity.Observable();
         for (let observable of arguments) {
-            if (!(observable instanceof Observable)) {
+            if (!(observable instanceof reactivity.Observable)) {
                 throw new TypeError(`Observable expected, ${typeof(observable)} found!`);
             }
             observable.subscribe((x) => {merged.emit(x);});
