@@ -6,11 +6,24 @@ api.http = require('http');
 api.websocket = require('websocket');
 
 
-const index = api.fs.readFileSync('./index.html');
+// const index = api.fs.readFileSync('./index.html');
+// const reactivity_js = api.fs.readFileSync('./reactivity.js');
 
 const server = api.http.createServer((req, res) => {
-  res.writeHead(200);
-  res.end(index);
+  if (req.url === '/') {
+    // Readin file here to prevent restarting app on files changes.
+    // TODO: remove when development is done
+    const index = api.fs.readFileSync('./index.html');
+    res.writeHead(200);
+    res.end(index);
+  } else if (req.url === '/reactivity.js') {
+    const reactivity_js = api.fs.readFileSync('./reactivity.js');
+    res.writeHead(200);
+    res.end(reactivity_js);
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
 });
 
 server.listen(8042, () => {
