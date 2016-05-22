@@ -9,8 +9,6 @@
   // Step one: get all base data
   const root = this;
   const previous_reactivity = root.reactivity;
-  const has_require = typeof(require) !== 'undefined';
-
 
   // Use a reactivity namespace
   const reactivity = {};
