@@ -158,6 +158,30 @@
     return this;
   }
 
+  reactivity.WSObservable = class extends reactivity.Observable {
+    constructor(ws) {
+      super();
+      this.ws = ws;
+
+      this.ws.onmessage = (event) => {
+        let data = JSON.parse(event.data);
+        this._emit({_source: 'remote', data: data});
+      }
+    }
+
+    emit(data) {
+      this._emit({_source: 'local', data: data})
+    }
+
+    _emit({_source, data}) {
+      if (_source === 'local') {
+        this.ws.send(JSON.stringify(data));
+      } 
+
+      super.emit(data);
+    }
+  }
+
   // Export
   // Borrowed from http://goo.gl/DjzSUh
   if (typeof exports !== 'undefined' ) {
@@ -170,6 +194,3 @@
     root.reactivity = reactivity
   }
 }).call(this);
-
-
-/* vim: set ts=2 sw=2 tw=0 et : */
