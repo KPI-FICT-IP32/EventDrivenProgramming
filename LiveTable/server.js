@@ -6,23 +6,31 @@ api.http = require('http');
 api.websocket = require('websocket');
 
 
-// const index = api.fs.readFileSync('./index.html');
-// const reactivity_js = api.fs.readFileSync('./reactivity.js');
+const FILES = {
+  '/'              : './index.html',
+  '/reactivity.js' : './reactivity.js',
+  '/formula.js'    : './formula.js',
+}
+
 
 const server = api.http.createServer((req, res) => {
-  if (req.url === '/') {
-    // Readin file here to prevent restarting app on files changes.
-    // TODO: remove when development is done
-    const index = api.fs.readFileSync('./index.html');
+  // Reading file here to prevent restarting app on files changes.
+  // TODO: rewrite when development is done
+  const filename = FILES[req.url];
+  if (filename) {
+    const file = api.fs.readFileSync(filename);
     res.writeHead(200);
-    res.end(index);
-  } else if (req.url === '/reactivity.js') {
-    const reactivity_js = api.fs.readFileSync('./reactivity.js');
-    res.writeHead(200);
-    res.end(reactivity_js);
+    res.end(file);
   } else {
     res.writeHead(404);
-    res.end();
+    res.end(`
+      <html>
+      <head><title>404 Not found</title></head>
+      <body>
+        <img src="http://http.cat/404">
+      </body>
+      </html>
+    `);
   }
 });
 
