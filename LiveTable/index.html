@@ -15,6 +15,7 @@ input { border: 1px solid green; width: 30px; }
   const table = document.getElementById('table');
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+  // TODO: find a way to replace this with something more beautiful
   let tr;
   tr = document.createElement('tr');
   tr.innerHTML = `<td></td>${letters.map((col) => `<td> ${col} </td>`).join('')}`;
@@ -44,6 +45,11 @@ input { border: 1px solid green; width: 30px; }
       value: target.value,
     });
   }
+
+  /*
+   * TODO: Build a formula and evaluate it as any of its values changes 
+   * You can use a formula.js module for that
+   */
 
 </script>
 </body>
