@@ -18,16 +18,22 @@
       this._cell_regex = re || /[A-Z]+[1-9][0-9]*/g;
 
       this.cell_names = str.match(this._cell_regex) || [];
-      this._prepared = formula.Formula._prepare(this._str, this._cell_regex);
+
+      const {is_fm, prep} = formula.Formula._process_string(
+        this._str,        // Input string
+        this._cell_regex  // Cell regex
+      );
+      this.is_fm = is_fm;
+      this._prepared = prep;
     }
 
-    static _prepare(str, re) {
-      // Remove spaces from beginning and end 
-      const trimmed = str.trim();
-
+    static _process_string(str, re) {
       // Formula should start from '=' sign. Otherwise it is a text
-      if (trimmed.indexOf('=') !== 0)
-        return str;
+      if (str.indexOf('=') !== 0)
+        return {
+          is_fm: false,  // This is not a formula, but const expr
+          prep : str,    // Hence return it as is
+        };
 
       const prepared = (
         trimmed
@@ -35,17 +41,21 @@
         .replace(re, (match) => `this.${match}`)  // TODO: improve this
       );
 
-      return prepared;
-    }
+      return {
+        is_fm: true,      // This is a calculable formula
+        prep : prepared,  // Return prepared for ``eval`` string
+      };
+    };
 
     evaluate(context) {
       const prepared = this._prepared;  // To avoid issues with context
+      if (!this.is_fm) return prepared;
 
-      /* 
+      /*
        * FIXME: this is a terrible security issue
        * Any code injection is possible here
        */
-      return (function() { return prepared=="" ? this._str : eval(prepared); }).call(context);
+      return (function() { return eval(prepared); }).call(context);
     }
   }
 
