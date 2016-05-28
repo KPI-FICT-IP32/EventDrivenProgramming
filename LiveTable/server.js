@@ -54,6 +54,7 @@ ws.on('request', (req) => {
         data = message[dataName];
     console.log(`Received: ${data}`);
     clients.forEach((client) => {
+      debugger;
       if (connection !== client) {
         client.send(data);
       }

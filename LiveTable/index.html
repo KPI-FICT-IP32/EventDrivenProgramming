@@ -7,11 +7,12 @@
 input { border: 1px solid green; width: 30px; }
 </style>
 <script src="/reactivity.js" type="text/javascript"></script>
+<script src="/formula.js" type="text/javascript"></script>
 <script>
   'use strict';
   const socket = new WebSocket('ws://127.0.0.1:8042/');
   const eventBus = new reactivity.WSObservable(socket);
-
+  var inputMode = false;
   const table = document.getElementById('table');
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -33,24 +34,58 @@ input { border: 1px solid green; width: 30px; }
       const listener = (
           eventBus
           .filter((data) => data.cell === cell )
-          .subscribe(({value}) => {input.value = value;})
+          .subscribe(({value}) => {
+            if(!inputMode) {
+
+              var _cells = {}
+              input._formula = new formula.Formula(value);
+              input._formula.cell_names.map((d) => {
+                _cells[d] = document.getElementById(d).value;
+              });
+              input.value = input._formula.evaluate(_cells);
+            } else {
+              input.value = value;
+            }
+          })
       );
+
       input.addEventListener('keyup', keyup);
+      input.addEventListener('focus', focusin);
+      input.addEventListener('blur', focusout);
     });
   }
 
   function keyup({target}) {
+    target._formula = new formula.Formula(target.value);
+
     eventBus.emit({
       cell: target.id,
-      value: target.value,
+      value: target._formula._str,
     });
   }
 
+  function focusin({target}) {
+    inputMode = true;
+    target.value = target._formula._str; 
+  }
+
+  function focusout({target}) {
+    let _cells = {}
+    
+    target._formula = new formula.Formula(target.value);
+
+    target._formula.cell_names.forEach((d) => {
+      let value = document.getElementById(d).value
+      _cells[d] = value;
+    });
+    inputMode = false;
+
+    target.value = target._formula.evaluate(_cells); 
+  }
   /*
    * TODO: Build a formula and evaluate it as any of its values changes 
    * You can use a formula.js module for that
    */
-
 </script>
 </body>
 </html>

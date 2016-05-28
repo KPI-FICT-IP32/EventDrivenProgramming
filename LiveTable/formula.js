@@ -16,7 +16,8 @@
     constructor(str, re) {
       this._str = str;
       this._cell_regex = re || /[A-Z]+[1-9][0-9]*/g;
-      this.cell_names = str.match(this._cell_regex);
+
+      this.cell_names = str.match(this._cell_regex) || [];
       this._prepared = formula.Formula._prepare(this._str, this._cell_regex);
     }
 
@@ -44,7 +45,7 @@
        * FIXME: this is a terrible security issue
        * Any code injection is possible here
        */
-      return (function() { return eval(prepared); }).call(context);
+      return (function() { return prepared=="" ? this._str : eval(prepared); }).call(context);
     }
   }
 
