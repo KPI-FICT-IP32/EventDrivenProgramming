@@ -40,12 +40,12 @@
 
     evaluate(context) {
       const prepared = this._prepared;  // To avoid issues with context
-
+      const _str = this._str
       /* 
        * FIXME: this is a terrible security issue
        * Any code injection is possible here
        */
-      return (function() { return prepared=="" ? this._str : eval(prepared); }).call(context);
+      return (function() { return prepared === "" ? _str : eval(prepared); }).call(context);
     }
   }
 

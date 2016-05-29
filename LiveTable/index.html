@@ -31,26 +31,41 @@ input { border: 1px solid green; width: 30px; }
     letters.forEach((col) => {
       let cell = col + i;
       let input = document.getElementById(cell);
+      
+      // cell._referenced_by shows which cells should be recalculated when current cell changes
+      input._referenced_by = [];
+      
       const listener = (
           eventBus
           .filter((data) => data.cell === cell )
           .subscribe(({value}) => {
+            //FIXME: not elegant way to not apply changes if current client is a source of change
             if(!inputMode) {
-
-              var _cells = {}
+              var _cells = {};
+              
               input._formula = new formula.Formula(value);
-              input._formula.cell_names.map((d) => {
-                _cells[d] = document.getElementById(d).value;
+              
+              input._formula.cell_names.forEach((d) => {
+                let cell = document.getElementById(d);
+                
+                _cells[d] = cell.value;
+
+                // FIXME: remove reference to the certain cell when current cell is no longer referenced by the certain cell
+                // TODO: Change to something more elegant
+                if(cell._referenced_by.indexOf(input.id) == -1)
+                  cell._referenced_by.push(input.id);
               });
+              
               input.value = input._formula.evaluate(_cells);
+
             } else {
               input.value = value;
             }
           })
       );
-
-      input.addEventListener('keyup', keyup);
+      // when focusing in the input, shows actual formula's raw string
       input.addEventListener('focus', focusin);
+      // when focus out - shows calculated formula
       input.addEventListener('blur', focusout);
     });
   }
@@ -58,15 +73,11 @@ input { border: 1px solid green; width: 30px; }
   function keyup({target}) {
     target._formula = new formula.Formula(target.value);
 
-    eventBus.emit({
-      cell: target.id,
-      value: target._formula._str,
-    });
   }
 
   function focusin({target}) {
     inputMode = true;
-    target.value = target._formula._str; 
+    target.value = target._formula ? target._formula._str : ''; 
   }
 
   function focusout({target}) {
@@ -78,14 +89,27 @@ input { border: 1px solid green; width: 30px; }
       let value = document.getElementById(d).value
       _cells[d] = value;
     });
+
+    
+    eventBus.emit({
+      cell: target.id,
+      value: target._formula._str,
+    });
+
+    target._referenced_by.forEach((d) => {
+      let cell = document.getElementById(d);
+
+      // send refresh event to the cells which depends on current cell
+      eventBus.emit({
+        cell: cell.id,
+        value: cell._formula._str
+      })
+    })
+
     inputMode = false;
 
     target.value = target._formula.evaluate(_cells); 
   }
-  /*
-   * TODO: Build a formula and evaluate it as any of its values changes 
-   * You can use a formula.js module for that
-   */
 </script>
 </body>
 </html>
