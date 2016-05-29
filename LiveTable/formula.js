@@ -36,7 +36,7 @@
         };
 
       const prepared = (
-        trimmed
+        str
         .slice(1)  // Remove '=' from the beginning
         .replace(re, (match) => `this.${match}`)  // TODO: improve this
       );
