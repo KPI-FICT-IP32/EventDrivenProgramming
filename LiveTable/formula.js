@@ -38,7 +38,7 @@
       const prepared = (
         str
         .slice(1)  // Remove '=' from the beginning
-        .replace(re, (match) => `this.${match}`)  // TODO: improve this
+        .replace(re, (match) => `Number(this.${match})`)  // TODO: improve this
       );
 
       return {

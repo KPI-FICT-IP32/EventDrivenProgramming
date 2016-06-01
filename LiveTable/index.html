@@ -38,7 +38,7 @@ input { border: 1px solid green; width: 30px; }
       const listener = (
           eventBus
           .filter((data) => data.cell === cell )
-          .subscribe(({value}) => {
+          .subscribe(({value, source}) => {
             //FIXME: not elegant way to not apply changes if current client is a source of change
             if(!inputMode) {
               var _cells = {};
@@ -54,12 +54,20 @@ input { border: 1px solid green; width: 30px; }
                 // TODO: Change to something more elegant
                 if(cell._referenced_by.indexOf(input.id) == -1)
                   cell._referenced_by.push(input.id);
+
+                input._referenced_by.forEach(d => {
+                  let cell = document.getElementById(d);
+                  // send message to cells which refers to the current cell 
+                  eventBus.emit({
+                    cell: cell.id,
+                    value: cell._formula._str
+                  });
+                });
+
               });
               
               input.value = input._formula.evaluate(_cells);
 
-            } else {
-              input.value = value;
             }
           })
       );
@@ -70,12 +78,10 @@ input { border: 1px solid green; width: 30px; }
     });
   }
 
-  function keyup({target}) {
-    target._formula = new formula.Formula(target.value);
-
-  }
 
   function focusin({target}) {
+    // force focusout event for previously focused element
+
     inputMode = true;
     target.value = target._formula ? target._formula._str : ''; 
   }
@@ -83,7 +89,7 @@ input { border: 1px solid green; width: 30px; }
   function focusout({target}) {
     let _cells = {}
     
-    target._formula = new formula.Formula(target.value);
+    target._formula = new formula.Formula(target.value.trim());
 
     target._formula.cell_names.forEach((d) => {
       let value = document.getElementById(d).value
@@ -109,6 +115,7 @@ input { border: 1px solid green; width: 30px; }
     inputMode = false;
 
     target.value = target._formula.evaluate(_cells); 
+
   }
 </script>
 </body>
